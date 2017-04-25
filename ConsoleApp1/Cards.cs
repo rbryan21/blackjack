@@ -117,23 +117,23 @@ namespace BlackJack
             return cards;
         }
 
-        public List<Cards> DealMultiple(int times)
+        public List<Cards> DealMultiple(int times, bool shuffled = true)
         {
             var cards = new List<Cards>();
 
             for (int i = 0; i < times; i++)
             {
-                cards.Add(Deal());
+                cards.Add(Deal(shuffled));
             }
 
             return cards;
         }
 
-        public Cards Deal()
+        public Cards Deal(bool shuffled = true)
         {
-            var card = Deck.First();
+            var useDeck = shuffled ? ShuffledDeck : Deck;
+            var card = useDeck.First();
             Deck.RemoveAt(0);
-
             return card;
         }
 

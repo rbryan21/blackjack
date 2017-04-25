@@ -23,7 +23,6 @@ namespace BlackJack
 
             while (isPlaying)
             {
-                Console.WriteLine("Test");
                 isPlayingBlackJack = game.ValidateResponse("Welcome to BlackJack would you like to play?");
 
                 //quit = response == -1 ? true : false;
@@ -32,8 +31,9 @@ namespace BlackJack
                     Console.WriteLine(string.Format("Your current money is {0}", player.Money));
                     Console.WriteLine(string.Format("Dealer's curent money is {0}", dealer.Money));
 
-                    Console.WriteLine("\nPlase Enter a bet:");
-                    player.SetBet(int.Parse(Console.ReadLine()));
+                    player.SetBet(game.ValidateBet("\nPlease Enter a bet:"));
+
+                    Console.WriteLine("Player's bet = " + player.Bet);
 
                     var deck = cards.ShuffledDeck;
 
@@ -97,7 +97,7 @@ namespace BlackJack
 
                     if (dealerBust)
                     {
-                        player.IncreaseMoney(player.Bet);
+                        player.DoublePlayersMoney();
                         dealer.DecreaseMoney(player.Bet);
                     }
                     else if (playerBust)
@@ -137,6 +137,17 @@ namespace BlackJack
             }
         }
 
+        public int ValidateBet(string question)
+        {
+            int response = 0;
+            while (response == 0)
+            {
+                Console.WriteLine(question);
+                response = ReadNumericInput();
+            }
+            return response;
+        }
+
         public bool ValidateResponse(string question)
         {
             int response = 0;
@@ -161,6 +172,22 @@ namespace BlackJack
             else if (input.Equals("No") || input.Equals("no") || input.Equals("N") || input.Equals("n"))
             {
                 response = -1;
+            }
+
+            return response;
+        }
+
+        public int ReadNumericInput(string input = "")
+        {
+            input = string.IsNullOrEmpty(input) ? Console.ReadLine() : input;
+            int response = 0;
+            try
+            {
+                response = int.Parse(input);
+            }
+            catch (FormatException e)
+            {
+                Console.WriteLine("Incorrect input");
             }
 
             return response;

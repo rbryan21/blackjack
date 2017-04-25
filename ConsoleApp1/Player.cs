@@ -55,6 +55,11 @@ namespace BlackJack
             this.money += money;
         }
 
+        public void DoublePlayersMoney()
+        {
+            money *= 2;
+        }
+
         public void DecreaseMoney(int money)
         {
             this.money -= money;
@@ -66,14 +71,14 @@ namespace BlackJack
 
             if (player.Hand.GetValue() > dealer.Hand.GetValue())
             {
-                player.IncreaseMoney(player.Bet);
+                player.DoublePlayersMoney();
                 dealer.DecreaseMoney(player.Bet);
                 outcome = 1;
             }
             else if (player.Hand.GetValue() < dealer.Hand.GetValue())
             {
                 player.DecreaseMoney(player.Bet);
-                dealer.DecreaseMoney(player.Bet);
+                dealer.IncreaseMoney(player.Bet);
                 outcome = -1;
             }
 

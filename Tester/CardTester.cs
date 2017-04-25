@@ -39,9 +39,9 @@ namespace Tester
         public void VerifyMultipleDeals()
         {
             int value = 0;
-            var cardList = cards.DealMultiple(100);
+            var cardList = cards.DealMultiple(100, false);
 
-            for (int i = 0; i< cardList.Count; i++)
+            for (int i = 0; i < cardList.Count; i++)
             {
                 value = ResetValue(++value);
                 Assert.That(cardList[i].Value == value);
@@ -51,7 +51,7 @@ namespace Tester
         [Test]
         public void VerifyDeal()
         {
-            var card = cards.Deal();
+            var card = cards.Deal(false);
             Assert.That(card.Value == 1);
         }
 
