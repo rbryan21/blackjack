@@ -11,58 +11,29 @@ namespace BlackJack
         private Hand hand;
         private int money;
         private int bet;
-        private Boolean isDealer;
+        private bool isDealer;
 
         public Player()
         {
-
         }
 
-        public Player(Hand hand, Boolean isDealer)
+        public Player(bool isDealer)
+        {
+            this.isDealer = isDealer;
+            money = isDealer ? 10000 : 1000;
+        }
+
+        public int Money => money;
+
+        public int Bet => bet;
+
+        public bool IsDealer => isDealer;
+
+        public Hand Hand => hand;
+
+        public void SetHand(Hand hand)
         {
             this.hand = hand;
-            this.isDealer = isDealer;
-            if (isDealer)
-            {
-                money = 10000;
-            }
-            else
-            {
-                money = 1000;
-            }
-        }
-
-        public int GetMoney()
-        {
-            return money;
-        }
-
-        public int GetBet()
-        {
-            return bet;
-        }
-
-        public Boolean IsDealer()
-        {
-            return isDealer;
-        }
-
-        public void SetDealer(Boolean isDealer)
-        {
-            this.isDealer = isDealer;
-        }
-
-        public Hand Hand
-        {
-            get
-            {
-                return hand;
-            }
-        }
-
-        public void SetMoney(int money)
-        {
-            this.money = money;
         }
 
         public void SetBet(int bet)
@@ -79,20 +50,63 @@ namespace BlackJack
             this.bet = bet;
         }
 
+        public void IncreaseMoney(int money)
+        {
+            this.money += money;
+        }
+
         public void DecreaseMoney(int money)
         {
             this.money -= money;
         }
 
-        public void PlayerWin()
+        public int EvaluateHand(Player player, Player dealer)
         {
-            this.money *= 2;
+            int outcome = 0;
+
+            if (player.Hand.GetValue() > dealer.Hand.GetValue())
+            {
+                player.IncreaseMoney(player.Bet);
+                dealer.DecreaseMoney(player.Bet);
+                outcome = 1;
+            }
+            else if (player.Hand.GetValue() < dealer.Hand.GetValue())
+            {
+                player.DecreaseMoney(player.Bet);
+                dealer.DecreaseMoney(player.Bet);
+                outcome = -1;
+            }
+
+            return outcome;
         }
 
-        public void PlayerLose()
+        public bool PlayerWin()
         {
-            this.money -= this.bet;
+            bool win = false;
+
+            if (IsDealer == false)
+            {
+                win = Money >= 2000 ? true : false;
+            }
+
+            return win;
         }
 
+        public bool PlayerLose()
+        {
+            bool lose = false;
+
+            if (IsDealer == false)
+            {
+                lose = Money <= 0 ? true : false;
+            }
+
+            return lose;
+        }
+
+        public void NoNegativePlayerMoney()
+        {
+            money = Money < 0 ? 0 : money;
+        }
     }
 }

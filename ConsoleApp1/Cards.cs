@@ -23,21 +23,9 @@ namespace BlackJack
             this.value = value;
         }
 
-        public int Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public int Value => value;
 
-        public string Suit
-        {
-            get
-            {
-                return suit;
-            }
-        }
+        public string Suit => suit;
 
         public List<Cards> Deck
         {
@@ -45,6 +33,25 @@ namespace BlackJack
             {
                 deck = deck ?? CreateDeck();
                 deck = deck.Count == 0 ? CreateDeck() : deck;
+                return deck;
+            }
+        }
+
+        public List<Cards> ShuffledDeck
+        {
+            get
+            {
+                if (deck == null)
+                {
+                    deck = CreateDeck();
+                    Shuffle(true);
+                }
+                else if (deck.Count == 0)
+                {
+                    deck = CreateDeck();
+                    Shuffle(true);
+                }
+
                 return deck;
             }
         }

@@ -16,94 +16,121 @@ namespace Tester
         [SetUp]
         public void Init()
         {
+        }
+
+        [Test]
+        public void TestOneCard()
+        {
+            List<Cards> cards = new List<Cards>();
+            cards.Add(new Cards("S", 2));
+
+            hand = new Hand(cards);
+
+            Assert.That(hand.GetValue() == 2);
+        }
+
+        [Test]
+        public void TestTwoCards()
+        {
+            List<Cards> cards = new List<Cards>();
+            cards.Add(new Cards("S", 2));
+            cards.Add(new Cards("H", 5));
+
+            hand = new Hand(cards);
+
+            Assert.That(hand.GetValue() == 7);
+        }
+
+        [Test]
+        public void TestFaceCard()
+        {
+            List<Cards> cards = new List<Cards>();
+            cards.Add(new Cards("H", 13));
+
+            hand = new Hand(cards);
+
+            Assert.That(hand.GetValue() == 10);
+        }
+
+        [Test]
+        public void TestIsAce()
+        {
             hand = new Hand();
+
+            Assert.That(hand.IsAce(new Cards("H", 1)) == true);
         }
 
         [Test]
-        public void TestOneFaceUp()
+        public void TestIsAceHigh()
         {
-            List<Cards> faceUp = new List<Cards>();
-            faceUp.Add(new Cards("S", 2));
-            hand.SetFaceUp(faceUp);
-            Assert.That(hand.GetTotalValue() == 2);
+            hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10),
+                new Cards("H", 11),
+                new Cards("H", 1)
+            });
+
+            Assert.That(hand.IsAceHigh() == false);
         }
 
         [Test]
-        public void TestOneFaceDown()
+        public void TestBust()
         {
-            List<Cards> faceDown = new List<Cards>();
-            faceDown.Add(new Cards("S", 3));
-            hand.SetFaceDown(faceDown);
-            Assert.That(hand.GetTotalValue() == 3);
+            hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10),
+                new Cards("H", 11),
+                new Cards("H", 12)
+            });
+
+            Assert.That(hand.Bust() == true);
         }
 
         [Test]
-        public void TestMultipleFaceUp()
+        public void TestNoBust()
         {
-            List<Cards> faceUp = new List<Cards>();
-            faceUp.Add(new Cards("S", 2));
-            faceUp.Add(new Cards("H", 2));
-            faceUp.Add(new Cards("D", 2));
-            hand.SetFaceDown(faceUp);
-            Assert.That(hand.GetTotalValue() == 6);
+            hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
+
+            Assert.That(hand.Bust() == false);
         }
 
         [Test]
-        public void TestMultipleFaceDown()
+        public void TestTakeHit()
         {
-            List<Cards> faceDown = new List<Cards>();
-            faceDown.Add(new Cards("S", 2));
-            faceDown.Add(new Cards("H", 2));
-            faceDown.Add(new Cards("D", 2));
-            hand.SetFaceDown(faceDown);
-            Assert.That(hand.GetTotalValue() == 6);
+            hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
+
+            hand.TakeHit(new Cards("H", 2));
+            Assert.That(hand.GetValue() == 12);
         }
 
         [Test]
-        public void TestFaceDownAndFaceUp()
+        public void TestScoreWithHighAce()
         {
-            List<Cards> faceDown = new List<Cards>();
-            faceDown.Add(new Cards("S", 2));
-            faceDown.Add(new Cards("H", 2));
-            List<Cards> faceUp = new List<Cards>();
-            faceUp.Add(new Cards("C", 2));
-            hand.SetFaceDown(faceDown);
-            hand.SetFaceUp(faceUp);
-            Assert.That(hand.GetTotalValue() == 6);
+            hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
+
+            hand.TakeHit(new Cards("H", 1));
+            Assert.That(hand.GetValue(true) == 21);
         }
 
         [Test]
-        public void TestFaceCards()
+        public void TestScoreWithLowAce()
         {
-            List<Cards> faceDown = new List<Cards>();
-            faceDown.Add(new Cards("S", 11));
-            faceDown.Add(new Cards("H", 12));
-            faceDown.Add(new Cards("D", 13));
-            hand.SetFaceDown(faceDown);
-            Assert.That(hand.GetTotalValue() == 30);
-        }
+            hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
 
-        [Test]
-        public void TestAceActingAsOne()
-        {
-            List<Cards> faceDown = new List<Cards>();
-            faceDown.Add(new Cards("S", 2));
-            faceDown.Add(new Cards("H", 9));
-            faceDown.Add(new Cards("D", 9));
-            faceDown.Add(new Cards("C", 1));
-            hand.SetFaceDown(faceDown);
-            Assert.That(hand.GetTotalValue() == 21);
-        }
-
-        [Test]
-        public void TestAceActingAsEleven()
-        {
-            List<Cards> faceDown = new List<Cards>();
-            faceDown.Add(new Cards("S", 3));
-            faceDown.Add(new Cards("H", 7));
-            faceDown.Add(new Cards("C", 1));
-            hand.SetFaceDown(faceDown);
-            Assert.That(hand.GetTotalValue() == 21);
+            hand.TakeHit(new Cards("H", 1));
+            Assert.That(hand.GetValue(false) == 11);
         }
     }
 }

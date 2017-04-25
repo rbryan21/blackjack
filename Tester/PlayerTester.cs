@@ -13,36 +13,39 @@ namespace Tester
     public class PlayerTester
     {
         private Player player;
+        private Player dealer;
         
         [SetUp]
         public void Init()
         {
-            player = new Player();
+            player = new Player(false);
+            dealer = new Player(true);
         }
 
         [Test]
-        public void TestDecreaseMoney()
+        public void TestPlayerDefaultMoney()
         {
-            player.SetMoney(1000);
-            player.DecreaseMoney(800);
-            Assert.That(player.GetMoney() == 200);
+            Assert.That(player.Money == 1000);
         }
 
         [Test]
-        public void TestPlayerWin()
+        public void TestDealerDefaultMoney()
         {
-            player.SetMoney(200);
-            player.PlayerWin();
-            Assert.That(player.GetMoney() == 400);
+            Assert.That(dealer.Money == 10000);
         }
 
         [Test]
-        public void TestPlayerLose()
+        public void DecreasePlayerMoney()
         {
-            player.SetMoney(1000);
-            player.SetBet(200);
-            player.PlayerLose();
-            Assert.That(player.GetMoney() == 800);
+            player.DecreaseMoney(500);
+            Assert.That(player.Money == 500);
+        }
+
+        [Test]
+        public void IncreasePlayerMoney()
+        {
+            player.IncreaseMoney(500);
+            Assert.That(player.Money == 1500);
         }
 
         [Test]
@@ -50,7 +53,6 @@ namespace Tester
         {
             try
             {
-                player.SetMoney(1000);
                 player.SetBet(-1);
             }
             catch (LessThanMinimumBetException e)
@@ -64,13 +66,106 @@ namespace Tester
         {
             try
             {
-                player.SetMoney(1000);
                 player.SetBet(1200);
             }
             catch(BetGreaterThanMoneyException e)
             {
                 Assert.IsTrue(e.Message.Contains("You cannot bet more money than you have"));
             }
+        }
+
+        [Test]
+        public void TestPlayerWin()
+        {
+            player.IncreaseMoney(1000);
+            Assert.IsTrue(player.PlayerWin());
+        }
+
+        [Test]
+        public void TestPlayerLoss()
+        {
+            player.DecreaseMoney(1000);
+            Assert.IsTrue(player.PlayerLose());
+        }
+
+        [Test]
+        public void TestNoNegaviteMoney()
+        {
+            player.DecreaseMoney(1001);
+            player.NoNegativePlayerMoney();
+            Assert.IsTrue(player.Money == 0);
+        }
+
+        [Test]
+        public void TestSetBet()
+        {
+            player.SetBet(500);
+            Assert.That(player.Bet == 500);
+        }
+
+        [Test]
+        public void TestSetHand()
+        {
+            var hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
+            player.SetHand(hand);
+            Assert.That(hand.GetValue() == 10);
+        }
+
+        [Test]
+        public void TestPlayerWiningHand()
+        {
+            var hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
+            player.SetHand(hand);
+
+            var hand2 = new Hand(new List<Cards>
+            {
+                new Cards("H", 9)
+            });
+            dealer.SetHand(hand2);
+
+            Assert.That(player.EvaluateHand(player, dealer) == 1);
+        }
+
+        [Test]
+        public void TestPlayerLosingHand()
+        {
+            var hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 9)
+            });
+            player.SetHand(hand);
+
+            var hand2 = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
+            dealer.SetHand(hand2);
+
+            Assert.That(player.EvaluateHand(player, dealer) == -1);
+        }
+
+        [Test]
+        public void TestPush()
+        {
+            var hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 12)
+            });
+            player.SetHand(hand);
+
+            var hand2 = new Hand(new List<Cards>
+            {
+                new Cards("H", 10)
+            });
+            dealer.SetHand(hand2);
+
+            Assert.That(player.EvaluateHand(player, dealer) == 0);
         }
     }
 }

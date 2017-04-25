@@ -8,117 +8,63 @@ namespace BlackJack
 {
     public class Hand
     {
-        private List<Cards> faceUp;
-        private List<Cards> faceDown;
+        private List<Cards> hand;
+        private int max = 21;
 
         public Hand()
         {
-
         }
 
-        public Hand(List<Cards> faceUp, List<Cards> faceDown)
+        public Hand(List<Cards> cards)
         {
-            this.faceUp = faceUp;
-            this.faceDown = faceDown;
+            this.hand = cards;
         }
 
-        public List<Cards> FaceUp
-        {
-            get
-            {
-                return faceUp;
-            }
-        }
+        public List<Cards> PlayerHand => hand;
 
-        public List<Cards> FaceDown
-        {
-            get
-            {
-                return faceDown;
-            }
-        }
-
-        public void SetFaceDown(List<Cards> faceDown)
-        {
-            this.faceDown = faceDown;
-        }
-
-        public void SetFaceUp(List<Cards> faceUp)
-        {
-            this.faceUp = faceUp;
-        }
-
-        public void AddFaceUp(Cards card)
-        {
-            FaceUp.Add(card);
-        }
-
-        public void AddFaceDown(Cards card)
-        {
-            FaceDown.Add(card);
-        }
-
-        public int GetTotalValue()
+        public int GetValue(bool high = false)
         {
             int value = 0;
-            int max = 21;
 
-            if (FaceUp != null)
+            foreach (var card in PlayerHand)
             {
-                foreach (Cards card in FaceUp)
+                switch (card.Value)
                 {
-                    switch (card.Value)
-                    {
-                        case 1:
-                            if (value + 11 > max)
-                            {
-                                value += 1;
-                            }
-                            else
-                            {
-                                value += 11;
-                            }
-                            break;
-                        case 11:
-                        case 12:
-                        case 13:
-                            value += 10;
-                            break;
-                        default:
-                            value += card.Value;
-                            break;
-                    }
+                    case 1:
+                        value = high ? value + 11 : value + 1;
+                        break;
+                    case 11:
+                    case 12:
+                    case 13:
+                        value += 10;
+                        break;
+                    default:
+                        value += card.Value;
+                        break;
                 }
             }
 
-            if (FaceDown != null)
-            {
-                foreach (Cards card in FaceDown)
-                {
-                    switch (card.Value)
-                    {
-                        case 1:
-                            if (value + 11 > max)
-                            {
-                                value += 1;
-                            }
-                            else
-                            {
-                                value += 11;
-                            }
-                            break;
-                        case 11:
-                        case 12:
-                        case 13:
-                            value += 10;
-                            break;
-                        default:
-                            value += card.Value;
-                            break;
-                    }
-                }
-            }
             return value;
+        }
+
+        public bool IsAce(Cards card)
+        {
+            return card.Value == 1 ? true : false;
+        }
+
+        public bool IsAceHigh()
+        {
+            return Bust() ? true : false;
+        }
+        
+        public bool Bust()
+        {
+            return GetValue() > 21 ? true : false;
+        }
+
+        public void TakeHit(Cards card)
+        {
+            hand.Add(card);
         }
     }
 }
