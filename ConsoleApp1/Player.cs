@@ -54,12 +54,7 @@ namespace BlackJack
         {
             this.money += money;
         }
-
-        public void DoublePlayersMoney()
-        {
-            money *= 2;
-        }
-
+        
         public void DecreaseMoney(int money)
         {
             this.money -= money;
@@ -68,14 +63,16 @@ namespace BlackJack
         public int EvaluateHand(Player player, Player dealer)
         {
             int outcome = 0;
+            int playerTotal = player.hand.GetValue(true) > 21 ? player.Hand.GetValue() : player.Hand.GetValue(true);
+            int dealerTotal = dealer.hand.GetValue(true) > 21 ? dealer.Hand.GetValue() : dealer.Hand.GetValue(true);
 
-            if (player.Hand.GetValue() > dealer.Hand.GetValue())
+            if (playerTotal > dealerTotal)
             {
-                player.DoublePlayersMoney();
+                player.IncreaseMoney(player.Bet);
                 dealer.DecreaseMoney(player.Bet);
                 outcome = 1;
             }
-            else if (player.Hand.GetValue() < dealer.Hand.GetValue())
+            else if (playerTotal < dealerTotal)
             {
                 player.DecreaseMoney(player.Bet);
                 dealer.IncreaseMoney(player.Bet);
@@ -112,6 +109,12 @@ namespace BlackJack
         public void NoNegativePlayerMoney()
         {
             money = Money < 0 ? 0 : money;
+        }
+
+        public bool DealerHitting(Player dealer)
+        {
+            int value = dealer.Hand.GetValue();
+            return dealer.Hand.GetValue() < 17 && dealer.Hand.GetValue(true) < 17;
         }
     }
 }

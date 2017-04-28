@@ -157,5 +157,10 @@ namespace BlackJack
         {
             return count == 0;
         }
+
+        public bool IsAce()
+        {
+            return Value == 1 ? true : false;
+        }
     }
 }

@@ -57,11 +57,11 @@ namespace Tester
         {
             hand = new Hand();
 
-            Assert.That(hand.IsAce(new Cards("H", 1)) == true);
+            Assert.That(new Cards("H", 1).IsAce() == true);
         }
 
         [Test]
-        public void TestIsAceHigh()
+        public void TestLowAce()
         {
             hand = new Hand(new List<Cards>
             {
@@ -71,6 +71,17 @@ namespace Tester
             });
 
             Assert.That(hand.IsAceHigh() == false);
+        }
+
+        [Test]
+        public void TestIsAceHigh()
+        {
+            hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 10),
+                new Cards("H", 11)
+            });
+            Assert.That(hand.IsAceHigh() == true);
         }
 
         [Test]

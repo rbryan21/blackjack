@@ -167,5 +167,44 @@ namespace Tester
 
             Assert.That(player.EvaluateHand(player, dealer) == 0);
         }
+
+        [Test]
+        public void TestDealerIsHitting()
+        {
+            var hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 12),
+                new Cards("H", 2)
+            });
+            player.SetHand(hand);
+
+            Assert.That(player.DealerHitting(player) == true);
+        }
+
+        [Test]
+        public void TestDealerSoft17()
+        {
+            var hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 1),
+                new Cards("H", 6)
+            });
+            player.SetHand(hand);
+
+            Assert.That(player.DealerHitting(player) == false);
+        }
+
+        [Test]
+        public void TestDealer21()
+        {
+            var hand = new Hand(new List<Cards>
+            {
+                new Cards("H", 1),
+                new Cards("H", 11)
+            });
+            player.SetHand(hand);
+
+            Assert.That(player.DealerHitting(player) == false);
+        }
     }
 }

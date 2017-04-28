@@ -9,7 +9,6 @@ namespace BlackJack
     public class Hand
     {
         private List<Cards> hand;
-        private int max = 21;
 
         public Hand()
         {
@@ -47,14 +46,16 @@ namespace BlackJack
             return value;
         }
 
-        public bool IsAce(Cards card)
-        {
-            return card.Value == 1 ? true : false;
-        }
-
         public bool IsAceHigh()
         {
-            return Bust() ? true : false;
+            bool high = false;
+
+            if (GetValue(true) <= 21)
+            {
+                high = true;
+            }
+
+            return high;
         }
         
         public bool Bust()
@@ -65,6 +66,17 @@ namespace BlackJack
         public void TakeHit(Cards card)
         {
             hand.Add(card);
+        }
+
+        public bool Is21()
+        {
+            bool is21 = false;
+            if (GetValue() == 21 || GetValue(true) == 21)
+            {
+                is21 = true;
+            }
+
+            return is21;
         }
     }
 }

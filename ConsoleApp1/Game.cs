@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleApp1;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,11 +10,10 @@ namespace BlackJack
     public class Game
     {
         private Cards cards;
+        private CreateStrings create;
 
         static void Main(string[] args)
         {
-            Player player = new Player(false);
-            Player dealer = new Player(true);
             Cards cards = new Cards();
             Game game = new Game();
             bool isPlaying = true;
@@ -23,19 +23,24 @@ namespace BlackJack
 
             while (isPlaying)
             {
+                Player player = new Player(false);
+                Player dealer = new Player(true);
+                CreateStrings create = new CreateStrings(player, dealer);
+
                 isPlayingBlackJack = game.ValidateResponse("Welcome to BlackJack would you like to play?");
 
                 //quit = response == -1 ? true : false;
                 while (isPlayingBlackJack)
                 {
-                    Console.WriteLine(string.Format("Your current money is {0}", player.Money));
-                    Console.WriteLine(string.Format("Dealer's curent money is {0}", dealer.Money));
+                    game.PrintBlankLine();
+                    game.Print(create.CurrentMoney());
+                    game.Print(create.CurrentMoney(true));
 
-                    player.SetBet(game.ValidateBet("\nPlease Enter a bet:"));
-
-                    Console.WriteLine("Player's bet = " + player.Bet);
+                    game.PrintBlankLine();
+                    game.ValidateBet(player, create.GetBet());
 
                     var deck = cards.ShuffledDeck;
+                    Console.WriteLine(deck.Count);
 
                     var hands = game.InitialDeal();
 
@@ -54,11 +59,20 @@ namespace BlackJack
                     game.PrintInitialHand(player, dealer);
 
                     bool isHitting = true;
+                    playerBust = false;
+                    dealerBust = false;
+
                     while (isHitting)
                     {
                         game.PrintHand(player);
 
-                        var hit = game.ValidateResponse("\nDo you want to hit?");
+                        if (player.Hand.Is21())
+                        {
+                            break;
+                        }
+
+                        game.PrintBlankLine();
+                        var hit = game.ValidateResponse(create.GetHit());
 
                         if (hit)
                         {
@@ -67,10 +81,9 @@ namespace BlackJack
                             playerBust = player.Hand.Bust();
                             if (playerBust)
                             {
+                                isHitting = false;
                                 game.PrintBust(player);
                             }
-
-                            isHitting = playerBust ? false : isHitting;
                         }
                         else
                         {
@@ -80,28 +93,38 @@ namespace BlackJack
 
                     if (!playerBust)
                     {
-                        while (dealer.Hand.GetValue() < 17)
+                        game.PrintHand(dealer, true);
+
+                        while (dealer.DealerHitting(dealer))
                         {
                             dealer.Hand.TakeHit(cards.Deal());
 
-                            game.PrintHand(dealer, true);
-                        }
-
-                        if (dealer.Hand.Bust())
-                        {
-                            dealerBust = true;
-
-                            game.PrintBust(dealer, true);
+                            if (!dealer.Hand.Bust())
+                            {
+                                game.PrintHand(dealer, true);
+                            }
+                            else
+                            {
+                                dealerBust = true;
+                                game.PrintBust(dealer, true);
+                                break;
+                            }
                         }
                     }
 
+                    game.PrintBlankLine();
+
                     if (dealerBust)
                     {
-                        player.DoublePlayersMoney();
+                        game.Print(create.PlayerWin());
+
+                        player.IncreaseMoney(player.Bet);
                         dealer.DecreaseMoney(player.Bet);
                     }
                     else if (playerBust)
                     {
+                        game.Print(create.DealerWin());
+
                         player.DecreaseMoney(player.Bet);
                         dealer.IncreaseMoney(player.Bet);
                     }
@@ -110,41 +133,65 @@ namespace BlackJack
                         int outcome = player.EvaluateHand(player, dealer);
                         if (outcome == 1)
                         {
-                            Console.WriteLine("You have won!");
+                            game.Print(create.PlayerWin());
                         }
                         else if (outcome == -1)
                         {
-                            Console.WriteLine("The dealer has won!");
+                            game.Print(create.DealerWin());
                         }
                         else
                         {
-                            Console.WriteLine("You and dealer pushed");
+                            game.Print(create.Push());
                         }
                     }
 
+                    game.PrintBlankLine();
                     if (player.PlayerWin())
                     {
-                        Console.WriteLine("You have doubled your money and won!");
-                        break;
+                        game.Print(create.PlayerGameWin());
                     }
 
                     if (player.PlayerLose())
                     {
-                        Console.WriteLine("You have no more money. You have lost.");
-                        break;
+                        game.Print(create.PlayerGameLose());
                     }
                 }
             }
         }
 
-        public int ValidateBet(string question)
+        private void Print(string text, bool blank = false)
+        {
+            if (blank)
+            {
+                PrintBlankLine();
+            }
+
+            Console.WriteLine(text);
+        }
+
+        private void PrintBlankLine()
+        {
+            Console.WriteLine();
+        }
+
+        public int ValidateBet(Player player, string question) 
         {
             int response = 0;
             while (response == 0)
             {
-                Console.WriteLine(question);
-                response = ReadNumericInput();
+                try
+                {
+                    Console.WriteLine(question);
+                    response = ReadNumericInput();
+                    player.SetBet(response);
+                }
+                catch
+                {
+                    response = 0;
+                }
             }
+
+
             return response;
         }
 
@@ -206,32 +253,45 @@ namespace BlackJack
 
         public void PrintInitialHand(Player player, Player dealer)
         {
-            PrintHand(player);
-            Console.WriteLine();
-            Console.WriteLine("The dealer is showing the {0} of {1}", dealer.Hand.PlayerHand[1].Value, dealer.Hand.PlayerHand[1].Suit);
+            create = new CreateStrings(player, dealer);
+
+            PrintBlankLine();
+            Print(create.DealerInitialHand());
+            Print(create.GetCard(dealer.Hand.PlayerHand[1]));
         }
 
         public void PrintHand(Player player, bool isDealer = false)
         {
-            string firstLine = isDealer ? "The dealer's" : "Your";
-            Console.WriteLine(string.Format("{0} current hand is: ", firstLine));
+            create = new CreateStrings(player);
+
+            PrintBlankLine();
+            Print(create.HandFirstLine(isDealer));
+
+            bool hasAce = false;
             foreach (var x in player.Hand.PlayerHand)
             {
-                Console.WriteLine(string.Format("{0} of {1}", x.Value, x.Suit));
+                if (x.IsAce() && player.Hand.IsAceHigh())
+                {
+                    hasAce = true;
+                }
+
+                Print(create.GetCard(x));
             }
 
-            Console.WriteLine(string.Format("{0} total is {1}", firstLine, player.Hand.GetValue()));
+            Print(create.GetTotal(hasAce, isDealer));
         }
 
         public void PrintBust(Player player, bool isDealer = false)
         {
-            string firstLine = isDealer ? "The dealer's" : "Your";
-            Console.WriteLine(string.Format("{0} busted. {1} hand was ", firstLine, firstLine));
+            create = new CreateStrings(player);
+            PrintBlankLine();
+            Print(create.GetBust(player, isDealer));
             foreach (var x in player.Hand.PlayerHand)
             {
-                Console.WriteLine(string.Format("{0} of {1}", x.Value, x.Suit));
+                Print(create.GetCard(x));
             }
-            Console.WriteLine(string.Format("{0} total was {1}", firstLine, player.Hand.GetValue()));
+
+            Print(create.GetTotal(false, isDealer));
         }
     }
 }

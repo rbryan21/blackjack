@@ -47,6 +47,7 @@
     <Compile Include="GameTester.cs" />
     <Compile Include="HandTester.cs" />
     <Compile Include="PlayerTester.cs" />
+    <Compile Include="StringTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

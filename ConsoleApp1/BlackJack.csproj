@@ -48,6 +48,7 @@
     <Compile Include="LessThanMinimumBetException.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="CreateStrings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
