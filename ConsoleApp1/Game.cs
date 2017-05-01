@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace BlackJack
             bool isPlayingBlackJack = false;
             bool playerBust = false;
             bool dealerBust = false;
+            int gameCount = 0;
 
             while (isPlaying)
             {
@@ -27,9 +29,16 @@ namespace BlackJack
                 Player dealer = new Player(true);
                 CreateStrings create = new CreateStrings(player, dealer);
 
-                isPlayingBlackJack = game.ValidateResponse("Welcome to BlackJack would you like to play?");
+                if (gameCount > 0)
+                {
+                    isPlayingBlackJack = game.ValidateResponse("Welcome to BlackJack would you like to play again?", true);
 
-                //quit = response == -1 ? true : false;
+                }
+                else
+                {
+                    isPlayingBlackJack = game.ValidateResponse("Welcome to BlackJack would you like to play?", true);
+                }
+
                 while (isPlayingBlackJack)
                 {
                     game.PrintBlankLine();
@@ -40,7 +49,6 @@ namespace BlackJack
                     game.ValidateBet(player, create.GetBet());
 
                     var deck = cards.ShuffledDeck;
-                    Console.WriteLine(deck.Count);
 
                     var hands = game.InitialDeal();
 
@@ -149,11 +157,17 @@ namespace BlackJack
                     if (player.PlayerWin())
                     {
                         game.Print(create.PlayerGameWin());
+                        game.PrintBlankLine();
+                        gameCount++;
+                        isPlayingBlackJack = false;
                     }
 
                     if (player.PlayerLose())
                     {
                         game.Print(create.PlayerGameLose());
+                        game.PrintBlankLine();
+                        gameCount++;
+                        isPlayingBlackJack = false;
                     }
                 }
             }
@@ -183,10 +197,14 @@ namespace BlackJack
                 {
                     Console.WriteLine(question);
                     response = ReadNumericInput();
-                    player.SetBet(response);
+                    if (response != 0)
+                    {
+                        player.SetBet(response);
+                    }
                 }
-                catch
+                catch(Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     response = 0;
                 }
             }
@@ -195,13 +213,18 @@ namespace BlackJack
             return response;
         }
 
-        public bool ValidateResponse(string question)
+        public bool ValidateResponse(string question, bool isMenu = false)
         {
             int response = 0;
             while (response == 0)
             {
                 Console.WriteLine(question);
                 response = ReadYesOrNoInput();
+            }
+
+            if (isMenu && response == -1)
+            {
+                ExitGame();
             }
 
             return response == 1 ? true : false;
@@ -221,7 +244,21 @@ namespace BlackJack
                 response = -1;
             }
 
+            if (response == 0)
+            {
+                Console.WriteLine("Valid inputs are: Yes, yes, Y, y, No, no, N, or n");
+            }
+
             return response;
+        }
+
+        public void ExitGame()
+        {
+            Console.WriteLine("Goodbye!");
+            var exitTask = Task.Delay(2000).ContinueWith( _ => {
+                Environment.Exit(0);
+            });
+            exitTask.Wait();
         }
 
         public int ReadNumericInput(string input = "")
@@ -234,7 +271,11 @@ namespace BlackJack
             }
             catch (FormatException e)
             {
-                Console.WriteLine("Incorrect input");
+                Console.WriteLine("Input must be an integer");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
 
             return response;
